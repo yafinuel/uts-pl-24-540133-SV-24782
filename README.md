@@ -27,6 +27,7 @@ Sistem manajemen inventaris untuk toko kecil. Backend Laravel 13 + FrankenPHP, f
 3. **Akses:**
    - 🌐 Web: http://localhost:8080
    - 🔌 API: http://localhost:8000/api
+   - ❤️ Health Check: http://localhost:8000/health (dan via reverse proxy http://localhost:8080/health)
 
 ## Kredensial Default
 
@@ -41,12 +42,24 @@ docker compose down          # data tetap ada
 docker compose down -v       # reset semua data (termasuk database)
 ```
 
-## Bukti FrankenPHP
+## Logging & Monitoring
+
+Pengaturan log Laravel diarahkan langsung ke `stdout` (bukan file di dalam container) sehingga dapat dibaca secara terpusat oleh Docker daemon.
 
 ```bash
 docker compose logs backend
 ```
-Cari baris `FrankenPHP started` dan log akses `http.log.access` yang berisi `"uri":"/api/..."`.
+
+- Log akses FrankenPHP: `"logger":"http.log.access"`
+- Log terstruktur aplikasi Laravel (INFO, WARNING, ERROR) memuat konteks: pengguna (`user_id`, `user_email`), aksi (`action`), endpoint, dan alasan (`reason`) tanpa mencatat token, password, atau rahasia sensitif.
+- Batasan log pada Docker Compose: dibatasi dengan `max-size: 10m` dan `max-file: 3`.
+
+## Healthcheck
+
+Endpoint `/health` memeriksa status basis data (MySQL) dan sistem cache secara dinamis:
+- Status 200 OK jika basis data dan cache beroperasi normal (`healthy`).
+- Status 503 Service Unavailable jika basis data atau cache mengalami gangguan (`unhealthy`), disertai rincian komponen yang bermasalah.
+- Container `backend` dilengkapi healthcheck otomatis di `compose.yaml` dengan parameter `interval`, `timeout`, `retries`, dan `start_period`.
 
 ## Menjalankan Test Backend
 
