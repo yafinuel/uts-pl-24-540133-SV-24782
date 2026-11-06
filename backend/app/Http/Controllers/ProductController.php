@@ -7,6 +7,7 @@ use App\Http\Resources\ProductResource;
 use App\Models\Product;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class ProductController extends Controller
 {
@@ -35,6 +36,15 @@ class ProductController extends Controller
     {
         $product = Product::create($request->validated());
         $product->load('category');
+
+        Log::info('Data produk berhasil disimpan', [
+            'user_id' => $request->user()?->id,
+            'user_email' => $request->user()?->email,
+            'action' => 'store_product',
+            'product_id' => $product->id,
+            'sku' => $product->sku,
+            'reason' => 'Pengguna menambahkan produk baru ke inventaris',
+        ]);
 
         return response()->json(['data' => new ProductResource($product)], 201);
     }
