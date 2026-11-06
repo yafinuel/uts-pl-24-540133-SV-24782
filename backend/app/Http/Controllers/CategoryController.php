@@ -6,6 +6,7 @@ use App\Http\Requests\CategoryRequest;
 use App\Http\Resources\CategoryResource;
 use App\Models\Category;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
 
 class CategoryController extends Controller
 {
@@ -17,6 +18,15 @@ class CategoryController extends Controller
     public function store(CategoryRequest $request): JsonResponse
     {
         $category = Category::create($request->validated());
+
+        Log::info('Data kategori berhasil disimpan', [
+            'user_id' => $request->user()?->id,
+            'user_email' => $request->user()?->email,
+            'action' => 'store_category',
+            'category_id' => $category->id,
+            'name' => $category->name,
+            'reason' => 'Pengguna menambahkan kategori baru',
+        ]);
 
         return response()->json(['data' => new CategoryResource($category)], 201);
     }
