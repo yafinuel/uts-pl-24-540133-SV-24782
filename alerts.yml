@@ -1,0 +1,22 @@
+groups:
+  - name: aplikasi
+    rules:
+      - alert: LayananMati
+        expr: up{job="aplikasi"} == 0
+        for: 1m
+        labels:
+          severity: kritis
+        annotations:
+          summary: "Aplikasi tidak bisa ditarik"
+          action: "Cek docker compose ps lalu logs backend"
+
+      - alert: ErrorTinggi
+        expr: |
+          sum(rate(http_requests_total{status=~"5.."}[5m]))
+          / sum(rate(http_requests_total[5m])) > 0.05
+        for: 5m
+        labels:
+          severity: kritis
+        annotations:
+          summary: "Lebih dari 5% permintaan gagal"
+          action: "Lihat log backend, bandingkan dengan waktu deploy"

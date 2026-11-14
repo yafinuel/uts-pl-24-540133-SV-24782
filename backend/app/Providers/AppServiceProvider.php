@@ -11,7 +11,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->singleton(\Prometheus\CollectorRegistry::class, function () {
+            $adapter = new \App\Metrics\FileAdapter();
+            return new \Prometheus\CollectorRegistry($adapter);
+        });
     }
 
     /**
